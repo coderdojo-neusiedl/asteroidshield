@@ -42,7 +42,10 @@ var Missile = function Missile(startPosition, endPosition) {
    
    var lastDistance;
    var lastDrawTime = Date.now();
-   
+   var state = 'flying';
+   var explosionDiameter = 2;
+   var explosionColor = {r: 255, g: 156, b:12};
+
    this.id = nextMissileId++;
    
    if (missileImage === undefined) {
@@ -70,19 +73,40 @@ var Missile = function Missile(startPosition, endPosition) {
       drawCross();
    };
 
+   var drawExplosion = function drawExplosion() {
+      var colorToUse = color(explosionColor.r, explosionColor.g, explosionColor.b);
+      stroke(colorToUse);
+      fill(colorToUse);
+      arc(endPosition.x, endPosition.y, explosionDiameter, explosionDiameter, 0, 2 * 3.1415);
+      if (explosionDiameter > 40) {
+         state = 'delete';
+      }
+      explosionColor.r = explosionColor.r - 15;
+      explosionColor.g = explosionColor.g + 15;
+      explosionDiameter = explosionDiameter * 2;
+   };
+
    this.draw = function draw() {
       var currentTime = Date.now();
       var millisSinceLastDraw = currentTime - lastDrawTime;
       
       var distance = getDistance({x: x, y: y}, endPosition);
-      if (lastDistance === undefined || distance < lastDistance) {
+      if (state === 'flying' && (lastDistance === undefined || distance < lastDistance)) {
          drawMissileImage();
          drawTarget();
          x = x + (xIncrementPerMilli * millisSinceLastDraw);
          y = y + (yIncrementPerMilli * millisSinceLastDraw);
          lastDistance = distance;
       } else {
-         missiles = missiles.filter(missile => missile.id !== this.id);
+         if (state === 'flying') {
+            state = 'exploding';
+         }
+         if (state === 'exploding') {
+            drawExplosion();
+         }
+         if (state === 'delete') {
+            missiles = missiles.filter(missile => missile.id !== this.id);
+         }
       }
 
       lastDrawTime = currentTime;
