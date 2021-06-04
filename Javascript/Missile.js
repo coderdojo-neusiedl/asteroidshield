@@ -57,6 +57,19 @@ var Missile = function Missile(startPosition, endPosition) {
 		pop();
    };
 
+   var drawCross = function drawCross() {
+      var width = 16;
+      strokeWeight(1);
+      line(endPosition.x - width / 2, endPosition.y,             endPosition.x + width / 2, endPosition.y);
+      line(endPosition.x,             endPosition.y - width / 2, endPosition.x,             endPosition.y + width / 2);
+      noFill();
+      arc(endPosition.x, endPosition.y, width, width, 0, 2 * 3.1415);
+   };
+
+   var drawTarget = function drawTarget() {
+      drawCross();
+   };
+
    this.draw = function draw() {
       var currentTime = Date.now();
       var millisSinceLastDraw = currentTime - lastDrawTime;
@@ -64,6 +77,7 @@ var Missile = function Missile(startPosition, endPosition) {
       var distance = getDistance({x: x, y: y}, endPosition);
       if (lastDistance === undefined || distance < lastDistance) {
          drawMissileImage();
+         drawTarget();
          x = x + (xIncrementPerMilli * millisSinceLastDraw);
          y = y + (yIncrementPerMilli * millisSinceLastDraw);
          lastDistance = distance;
