@@ -17,10 +17,10 @@ This section describes how to install the workshop project.
 ### Windows
 1. create a folder on your hard disk and open a command line box
 2. execute `git clone https://github.com/coderdojo-neusiedl/asteroidshield.git .`
-3. execute `git checkout workshop-20210604`
+3. execute `git checkout workshop-20210611`
 
 
 ### Mac
 1. create a folder on your hard disk and open a command line box
 2. execute `git clone https://github.com/coderdojo-neusiedl/asteroidshield.git .`
-3. execute `git checkout workshop-20210604`
+3. execute `git checkout workshop-20210611`
