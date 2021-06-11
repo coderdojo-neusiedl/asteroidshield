@@ -3,20 +3,20 @@ var missiles = [];
 var nextMissileId = 1;
 
 var drawBase = function drawBase(base) {         
-   line( base.centerX - base.width / 2, base.centerY + base.height, 
-         base.centerX - base.width / 2, base.centerY);
-   line( base.centerX - base.width / 2, base.centerY,
-         base.centerX + base.width / 2, base.centerY);
-   line( base.centerX + base.width / 2, base.centerY,
-         base.centerX + base.width / 2, base.centerY + base.height);
+   line( base.getCenter().x - base.getWidth() / 2, base.getCenter().y + base.getHeight(), 
+         base.getCenter().x - base.getWidth() / 2, base.getCenter().y);
+   line( base.getCenter().x - base.getWidth() / 2, base.getCenter().y,
+         base.getCenter().x + base.getWidth() / 2, base.getCenter().y);
+   line( base.getCenter().x + base.getWidth() / 2, base.getCenter().y,
+         base.getCenter().x + base.getWidth() / 2, base.getCenter().y + base.getHeight());
 
    var diameter  = 20;
    var gunLength = 30;
 
-   arc(base.centerX, base.centerY, diameter, diameter, 3.1415, 0);
+   arc(base.getCenter().x, base.getCenter().y, diameter, diameter, 3.1415, 0);
 
    push();
-   translate(base.centerX, base.centerY);
+   translate(base.getCenter().x, base.getCenter().y);
    rotate(getRotation(base));
    strokeWeight(3);
    line(0, 0, 0, -gunLength);
@@ -27,7 +27,7 @@ var getNearestBase = function getNearestBase(mouseX) {
    var currentMinimumDistance = width;
    var nearestBase;
    bases.forEach(base => {
-      var distance = Math.abs(mouseX - base.centerX);
+      var distance = Math.abs(mouseX - base.getCenter().x);
       if(distance < currentMinimumDistance) {
          currentMinimumDistance = distance;
          nearestBase = base;
@@ -46,10 +46,10 @@ var drawGroundScene = function drawGroundScene() {
    strokeWeight(3);
    
    bases.forEach(base => {
-      line(x, y, base.centerX - base.width / 2, base.centerY + base.height);
+      line(x, y, base.getCenter().x - base.getWidth() / 2, base.getCenter().y + base.getHeight());
       drawBase(base);
-      x = base.centerX + base.width / 2;
-      y = base.centerY + base.height;
+      x = base.getCenter().x + base.getWidth() / 2;
+      y = base.getCenter().y + base.getHeight();
    });
    line(x, y, width, groundY);
    
@@ -57,8 +57,8 @@ var drawGroundScene = function drawGroundScene() {
 
 function setup() {
    createCanvas(600, 600);
-   var leftBase  = { centerX: width * 0.15, centerY: height * 0.85, width: width * 0.1,  height: height * 0.05};
-   var rightBase = { centerX: width * 0.90, centerY: height * 0.85, width: width * 0.15, height: height * 0.05};
+   var leftBase  = new Base({x: width * 0.15, y: height * 0.85}, width * 0.1,  height * 0.05);
+   var rightBase = new Base({x: width * 0.90, y: height * 0.85}, width * 0.15, height * 0.05);
    bases = [leftBase, rightBase];
 };
 
@@ -70,7 +70,7 @@ function draw() {
 
 function mouseClicked() {
    var nearestBase = getNearestBase(mouseX);
-   var startPosition = {x: nearestBase.centerX, y: nearestBase.centerY};
+   var startPosition = {x: nearestBase.getCenter().x, y: nearestBase.getCenter().y};
    var endPosition   = {x: mouseX,              y: mouseY};
    missiles.push(new Missile(startPosition, endPosition));
 }
