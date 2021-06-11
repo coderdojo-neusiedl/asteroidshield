@@ -2,27 +2,6 @@ var bases = [];
 var missiles = [];
 var nextMissileId = 1;
 
-var drawBase = function drawBase(base) {         
-   line( base.getCenter().x - base.getWidth() / 2, base.getCenter().y + base.getHeight(), 
-         base.getCenter().x - base.getWidth() / 2, base.getCenter().y);
-   line( base.getCenter().x - base.getWidth() / 2, base.getCenter().y,
-         base.getCenter().x + base.getWidth() / 2, base.getCenter().y);
-   line( base.getCenter().x + base.getWidth() / 2, base.getCenter().y,
-         base.getCenter().x + base.getWidth() / 2, base.getCenter().y + base.getHeight());
-
-   var diameter  = 20;
-   var gunLength = 30;
-
-   arc(base.getCenter().x, base.getCenter().y, diameter, diameter, 3.1415, 0);
-
-   push();
-   translate(base.getCenter().x, base.getCenter().y);
-   rotate(getRotation(base));
-   strokeWeight(3);
-   line(0, 0, 0, -gunLength);
-   pop();
-};
-
 var getNearestBase = function getNearestBase(mouseX) {
    var currentMinimumDistance = width;
    var nearestBase;
@@ -47,7 +26,7 @@ var drawGroundScene = function drawGroundScene() {
    
    bases.forEach(base => {
       line(x, y, base.getCenter().x - base.getWidth() / 2, base.getCenter().y + base.getHeight());
-      drawBase(base);
+      base.draw();
       x = base.getCenter().x + base.getWidth() / 2;
       y = base.getCenter().y + base.getHeight();
    });
@@ -70,7 +49,9 @@ function draw() {
 
 function mouseClicked() {
    var nearestBase = getNearestBase(mouseX);
-   var startPosition = {x: nearestBase.getCenter().x, y: nearestBase.getCenter().y};
-   var endPosition   = {x: mouseX,              y: mouseY};
-   missiles.push(new Missile(startPosition, endPosition));
+   var endPosition = {x: mouseX, y: mouseY};
+   var missile = nearestBase.fireTo(endPosition);
+   if (missile) {
+      missiles.push(missile);
+   }
 }
