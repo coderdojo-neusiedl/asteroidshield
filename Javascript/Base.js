@@ -1,6 +1,11 @@
 var Base = function Base(center, width, height) {
 
-   var count = 5;
+   var TOTAL_MISSILE_COUNT = 5;
+   var count               = TOTAL_MISSILE_COUNT;
+
+   this.getTotalMissileCount = function getTotalMissileCount() {
+      return TOTAL_MISSILE_COUNT;
+   };
 
    this.getCenter = function getCenter() {
       return center;
@@ -14,11 +19,14 @@ var Base = function Base(center, width, height) {
       return height;
    };
 
+   this.getBuildingVertices = function getBuildingVertices() {
+      return [ {x: center.x - width / 2, y: center.y + height},
+               {x: center.x - width / 2, y: center.y},
+               {x: center.x + width / 2, y: center.y},
+               {x: center.x + width / 2, y: center.y + height}];
+   };
+
    this.draw = function draw() {         
-      line( center.x - width / 2, center.y + height, center.x - width / 2, center.y);
-      line( center.x - width / 2, center.y, center.x + width / 2, center.y);
-      line( center.x + width / 2, center.y, center.x + width / 2, center.y + height);
-   
       var diameter  = 20;
       var gunLength = 30;
    

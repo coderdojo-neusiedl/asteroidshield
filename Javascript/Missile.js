@@ -1,4 +1,5 @@
 var missileImage;
+var nextMissileId = 1;
 
 var createMissileImage = function createMissileImage() {
    var bitmap = [ [0, 0, 0, 0, 1, 0, 0, 0, 0],
@@ -28,6 +29,8 @@ var createMissileImage = function createMissileImage() {
 };
 
 var Missile = function Missile(startPosition, endPosition) {
+   var EXPLODING = 'exploding';
+
    var movementPerSecond = 150;
    var millisPerSecond   = 1000;
    var x = startPosition.x;
@@ -86,6 +89,18 @@ var Missile = function Missile(startPosition, endPosition) {
       explosionDiameter = explosionDiameter * 2;
    };
 
+   this.getExplosionRadius = function getExplosionRadius() {
+      return explosionDiameter / 2;
+   };
+
+   this.isExploding = function isExploding() {
+      return state === EXPLODING;
+   };
+
+   this.getPosition = function getPosition() {
+      return {x: x, y: y};
+   };
+
    this.draw = function draw() {
       var currentTime = Date.now();
       var millisSinceLastDraw = currentTime - lastDrawTime;
@@ -99,9 +114,9 @@ var Missile = function Missile(startPosition, endPosition) {
          lastDistance = distance;
       } else {
          if (state === 'flying') {
-            state = 'exploding';
+            state = EXPLODING;
          }
-         if (state === 'exploding') {
+         if (state === EXPLODING) {
             drawExplosion();
          }
          if (state === 'delete') {

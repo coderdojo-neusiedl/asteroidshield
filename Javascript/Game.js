@@ -1,9 +1,12 @@
 var bases = [];
 var missiles = [];
 var asteroids = [];
-var nextMissileId = 1;
-var asteroidMaxY;
-   
+var vertices = [];
+var polygonVertices = [];
+var asteroidCount = 0;
+var asteroidInterval;
+var totalAsteroidCount;
+
 var getNearestBase = function getNearestBase(mouseX) {
    var currentMinimumDistance = width;
    var nearestBase;
@@ -22,24 +25,71 @@ var drawGroundScene = function drawGroundScene() {
    var x       = 0;
    var y       = groundY;
 
+   if (vertices.length === 0) {
+      vertices.push({x: 0, y: groundY});
+      bases.forEach(base => {
+         var buildingVertices = base.getBuildingVertices();
+         buildingVertices.forEach(v => vertices.push(v));
+      });
+      vertices.push({x: width, y: groundY});
+
+      vertices.forEach(v => polygonVertices.push(v));
+      polygonVertices.push({x: width, y: height});
+      polygonVertices.push({x: 0,     y: height});
+   }
+
+   stroke('black');
+   fill('black');
+  
+   beginShape();
+   polygonVertices.forEach(v => vertex(v.x, v.y));
+   endShape(CLOSE);
+
    stroke('yellow');
    fill('yellow');
    strokeWeight(3);
    
-   bases.forEach(base => {
-      line(x, y, base.getCenter().x - base.getWidth() / 2, base.getCenter().y + base.getHeight());
-      base.draw();
-      x = base.getCenter().x + base.getWidth() / 2;
-      y = base.getCenter().y + base.getHeight();
-   });
-   line(x, y, width, groundY);
-   
+   for(var i = 1; i < vertices.length; i++) {
+      var from = vertices[i - 1];
+      var to   = vertices[i];
+      line(from.x, from.y, to.x, to.y)
+   }
+
+   bases.forEach(base => base.draw());
+};
+
+var getRandomX = function getRandomX() {
+   return width * 0.05 + Math.random() * width * 0.9;
+}
+
+var deleteAsteroid = function deleteAsteroid(idToDelete) {
+   asteroids = asteroids.filter(asteroid => asteroid.id !== idToDelete);
 };
 
 var createAsteroid = function createAsteroid() {
-   var startX = width * 0.05 + Math.random() * width * 0.9;
-   console.log(startX);
-   asteroids.push(new Asteroid({x: startX, y: 50}, {x: 100, y: asteroidMaxY}));
+   if (asteroidCount >= totalAsteroidCount) {
+      clearInterval(asteroidInterval);
+   } else {
+      var startX = getRandomX();
+      var endX   = getRandomX();
+      asteroids.push(new Asteroid({x: startX, y: 50}, {x: endX, y: height}, deleteAsteroid));
+      asteroidCount++;
+   }
+};
+
+var getStruckAsteroids = function getStruckAsteroids() {
+   var explodingMissiles = missiles.filter(missile => missile.isExploding());
+   explodingMissiles.forEach(missile => {
+      var missileExplosionRadius = missile.getExplosionRadius();
+      var missilePosition        = missile.getPosition();
+      asteroids.filter(asteroid => asteroid.isFlying()).forEach(asteroid => {
+         var asteroidPosition = asteroid.getPosition();
+         var distance = dist(missilePosition.x, missilePosition.y, asteroidPosition.x, asteroidPosition.y);
+         if (distance <= missileExplosionRadius) {
+            asteroid.explode();
+         }
+      });
+   });
 };
 
 function setup() {
@@ -47,21 +97,17 @@ function setup() {
    var leftBase  = new Base({x: width * 0.15, y: height * 0.85}, width * 0.1,  height * 0.05);
    var rightBase = new Base({x: width * 0.90, y: height * 0.85}, width * 0.15, height * 0.05);
    bases = [leftBase, rightBase];
-   asteroidMaxY = 0;
-   bases.forEach(base => {
-      var y = base.getCenter().y + base.getHeight();
-      if (asteroidMaxY < y) {
-         asteroidMaxY = y;
-      }
-   });
-   setTimeout(createAsteroid, Math.random() * 1000);
+   totalAsteroidCount = 0;
+   bases.forEach(base => totalAsteroidCount += base.getTotalMissileCount());
+   asteroidInterval = setInterval(createAsteroid, 1500);
 };
 
 function draw() {
    background('black');
-   drawGroundScene();
+   getStruckAsteroids();
    asteroids.forEach(asteroid => asteroid.draw());
    missiles.forEach(missile => missile.draw());
+   drawGroundScene();
 };
 
 function mouseClicked() {

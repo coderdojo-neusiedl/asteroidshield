@@ -1,4 +1,5 @@
 var asteroidImage;
+var nextAsteroidId = 1;
 
 var createAsteroidImage = function createAsteroidImage() {
    var bitmap = 
@@ -44,7 +45,10 @@ var createAsteroidImage = function createAsteroidImage() {
    asteroidImage.updatePixels();
 };
 
-var Asteroid = function Asteroid(startPosition, endPosition) {
+var Asteroid = function Asteroid(startPosition, endPosition, onDeleteCallback) {
+   var FLYING    = 'flying';
+   var EXPLODING = 'exploding';
+
    var movementPerSecond = 150;
    var millisPerSecond   = 1000;
    var x = startPosition.x;
@@ -63,7 +67,7 @@ var Asteroid = function Asteroid(startPosition, endPosition) {
    var explosionDiameter = 2;
    var explosionColor = {r: 255, g: 156, b:12};
 
-   this.id = nextMissileId++;
+   this.id = nextAsteroidId++;
    
    if (asteroidImage === undefined) {
       createAsteroidImage();
@@ -90,25 +94,34 @@ var Asteroid = function Asteroid(startPosition, endPosition) {
       explosionDiameter = explosionDiameter * 2;
    };
 
+   this.getPosition = function getPosition() {
+      return {x: x, y: y};
+   };
+
+   this.explode = function explode() {
+      state = EXPLODING;
+   };
+
+   this.isFlying = function isFlying() {
+      return state === FLYING;
+   };
+
    this.draw = function draw() {
       var currentTime = Date.now();
       var millisSinceLastDraw = currentTime - lastDrawTime;
       
       var distance = getDistance({x: x, y: y}, endPosition);
-      if (state === 'flying' && (lastDistance === undefined || distance < lastDistance)) {
+      if (state === FLYING && (lastDistance === undefined || distance < lastDistance)) {
          drawAsteroidImage();
          x = x + (xIncrementPerMilli * millisSinceLastDraw);
          y = y + (yIncrementPerMilli * millisSinceLastDraw);
          lastDistance = distance;
       } else {
-         if (state === 'flying') {
-            state = 'exploding';
-         }
-         if (state === 'exploding') {
+         if (state === EXPLODING) {
             drawExplosion();
          }
          if (state === 'delete') {
-            missiles = missiles.filter(missile => missile.id !== this.id);
+            onDeleteCallback(this.id);
          }
       }
 
